@@ -26,6 +26,8 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         )
 
+# When objcopy generates a raw binary file, it will essentially produce
+# a memory dump of the contents of the input object file. All symbols and relocation information will be discarded.
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "output hex"
         COMMAND ${OBJCOPY} -O ihex -R .eeprom -R .fuse -R .lock -R .signature "${PROJECT_NAME}.elf" "${PROJECT_NAME}.hex"
