@@ -36,3 +36,10 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "output lss"
         COMMAND ${NM} --demangle --numeric-sort "${PROJECT_NAME}.elf" > "${PROJECT_NAME}.lss"
         )
+
+# TODO find a way to specify the depends as a variable
+# TODO is cat really the best tool? would one of the bin utils be more appropriate?
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMENT "concatenating binary images"
+        COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.bin ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin  > ${PROJECT_NAME}_bootloaded.bin
+        DEPENDS "samc21_bootloader.padded.bin")
