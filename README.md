@@ -8,11 +8,14 @@
 
 **TODO**
 
-* linker scripts
-    * the bootloader should be the one which determines where things go
-    * apps will need to reference the bootloader's provided `app.ld`
-* validate application
 * boot application
+    * change the LED used
+    * pad the binary as a post build step
+    * conditionally pad binary and jump only when a subsidiary project (otherwise just blink)
+    * perhaps Ozone will be able to debug it when provided with the concatenated binary?
+        * both will have debug info...
+        * use `nm` to generate a symbol listing
+* validate application
 * announce version
     * read from memory
     * communicate over network
