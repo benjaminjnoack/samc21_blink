@@ -5,7 +5,6 @@
 
 **TODO**
 
-* build blink using the `app.ld` script from the bootloader
 * build the bootloader code as a dependency
 * create the post build hooks to cat the two executables together
-
+    * use the padded bin from
