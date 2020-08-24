@@ -18,3 +18,20 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-T ${CMAKE_CURRENT_SOU
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.Map")
 
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".elf")
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMENT "output bin"
+        COMMAND ${OBJCOPY} -O binary "${PROJECT_NAME}.elf" "${PROJECT_NAME}.bin"
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        )
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMENT "output hex"
+        COMMAND ${OBJCOPY} -O ihex -R .eeprom -R .fuse -R .lock -R .signature "${PROJECT_NAME}.elf" "${PROJECT_NAME}.hex"
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        )
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMENT "output lss"
+        COMMAND ${NM} --demangle --numeric-sort "${PROJECT_NAME}.elf" > "${PROJECT_NAME}.lss"
+        )
