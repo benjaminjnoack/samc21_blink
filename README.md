@@ -5,6 +5,4 @@
 
 **TODO**
 
-* build the bootloader code as a dependency
-* create the post build hooks to cat the two executables together
-    * use the padded bin from
+* find a way to get the debug symbols into the bootloaded image
