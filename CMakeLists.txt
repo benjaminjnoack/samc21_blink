@@ -39,11 +39,12 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         )
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMENT "output ${PROJECT_NAME} S-records"
+        COMMENT "output ${PROJECT_NAME} S-record"
         COMMAND ${OBJCOPY} -O srec ${PROJECT_NAME}.elf ${PROJECT_NAME}.srec
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         BYPRODUCTS ${PROJECT_NAME}.srec ${PROJECT_NAME}.padded.srec
         )
+
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "output ${PROJECT_NAME} hex"
         COMMAND ${OBJCOPY} -O ihex -R .eeprom -R .fuse -R .lock -R .signature ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
