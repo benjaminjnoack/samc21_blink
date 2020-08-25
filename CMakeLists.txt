@@ -20,27 +20,42 @@ target_link_options(${PROJECT_NAME} PRIVATE LINKER:-Map=${CMAKE_BINARY_DIR}/${PR
 
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".elf")
 
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMENT "output bin"
-        COMMAND ${OBJCOPY} -O binary "${PROJECT_NAME}.elf" "${PROJECT_NAME}.bin"
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        )
-
 # When objcopy generates a raw binary file, it will essentially produce
 # a memory dump of the contents of the input object file. All symbols and relocation information will be discarded.
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMENT "output hex"
-        COMMAND ${OBJCOPY} -O ihex -R .eeprom -R .fuse -R .lock -R .signature "${PROJECT_NAME}.elf" "${PROJECT_NAME}.hex"
+        COMMENT "output ${PROJECT_NAME} bin"
+        COMMAND ${OBJCOPY} -O binary ${PROJECT_NAME}.elf ${PROJECT_NAME}.bin
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         )
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMENT "output lss"
-        COMMAND ${NM} --demangle --numeric-sort "${PROJECT_NAME}.elf" > "${PROJECT_NAME}.lss"
+        COMMENT "output ${PROJECT_NAME} S-records"
+        COMMAND ${OBJCOPY} -O srec ${PROJECT_NAME}.elf ${PROJECT_NAME}.srec
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        BYPRODUCTS ${PROJECT_NAME}.srec ${PROJECT_NAME}.padded.srec
+        )
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMENT "output ${PROJECT_NAME} hex"
+        COMMAND ${OBJCOPY} -O ihex -R .eeprom -R .fuse -R .lock -R .signature ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         )
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMENT "concatenating binary images"
+        COMMENT "output ${PROJECT_NAME} lss"
+        COMMAND ${NM} --demangle --numeric-sort ${PROJECT_NAME}.elf > ${PROJECT_NAME}.lss
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        )
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMENT "concatenating ${PROJECT_NAME} binary images"
         COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.bin ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin  > ${PROJECT_NAME}_bootloaded.bin
         DEPENDS ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.bin ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin
-        BYPRODUCTS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_bootloaded.bin)
+        BYPRODUCTS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_bootloaded.bin
+        )
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMENT "concatenating ${PROJECT_NAME} S-records"
+        COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.srec ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.srec  > ${PROJECT_NAME}_bootloaded.srec
+        DEPENDS ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.srec ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.srec
+        BYPRODUCTS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_bootloaded.srec
+        )

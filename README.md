@@ -10,5 +10,5 @@
     * binary has the advantage of being what we will likely send over CAN
     * could have a single ELF if the debug code didn't have main and other unique symbols
         * would be a mess of `#define` statements
-        
-* Ensure `VTOR` has been set correctly
+ 
+* blink using an interrupt to demonstrate that the interrupt table has been offset correctly
