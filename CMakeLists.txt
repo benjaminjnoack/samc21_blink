@@ -5,6 +5,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/samc21_bootloader/CMakeLists.txt)
 project(samc21_blink)
 set(CMAKE_VERBOSE_MAKEFILE true)
 add_executable(${PROJECT_NAME})
+# TODO find a better way to ensure all the output files from the bootloader are available before trying to use them
+add_dependencies(${PROJECT_NAME} samc21_bootloader)
 
 add_definitions(-D__SAMC21J18A__)
 
