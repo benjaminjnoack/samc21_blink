@@ -5,7 +5,6 @@
 
 **TODO**
 
-* ensure the padded bin gets built before the cat command runs
 * find a way to get the debug symbols into the bootloaded image
 
 OK, so the bootloader boot_app call is actually being made in the concatenated binary
@@ -29,6 +28,3 @@ I manually set the registers right before the asm instructions ran:
 Target.SetReg ("R0", 0x20002478);
 Target.SetReg ("R1", 0x0000415d);
 
-LDR R3, [R3]; now R3 has the stack pointer 0x20002478
-LDR R1, [R3]; it just loaded the instruction saved in the stack pointer into R1
-LDR R0, [R3, #4]; now R0 has all kinds of junk in it too
