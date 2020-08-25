@@ -5,6 +5,7 @@
 
 **TODO**
 
+* ensure the padded bin gets built before the cat command runs
 * find a way to get the debug symbols into the bootloaded image
 
 OK, so the bootloader boot_app call is actually being made in the concatenated binary
