@@ -20,12 +20,21 @@ target_link_options(${PROJECT_NAME} PRIVATE LINKER:-Map=${CMAKE_BINARY_DIR}/${PR
 
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".elf")
 
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMENT "output assembly"
+        COMMAND arm-none-eabi-objdump -d ${PROJECT_NAME}.elf > ${PROJECT_NAME}.s
+        COMMAND arm-none-eabi-objdump -D --dwarf=follow-links ${PROJECT_NAME}.elf > ${PROJECT_NAME}.S
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        BYPRODUCTS ${PROJECT_NAME}.s ${PROJECT_NAME}.S
+        )
+
 # When objcopy generates a raw binary file, it will essentially produce
 # a memory dump of the contents of the input object file. All symbols and relocation information will be discarded.
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "output ${PROJECT_NAME} bin"
         COMMAND ${OBJCOPY} -O binary ${PROJECT_NAME}.elf ${PROJECT_NAME}.bin
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        BYPRODUCTS ${PROJECT_NAME}.bin
         )
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
