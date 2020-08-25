@@ -64,6 +64,12 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         )
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMENT "Build ID"
+        COMMAND ${READELF} -n ${PROJECT_NAME}.elf | grep \"Build ID:\" | cut -d \: -f 2 | sed 's/ //'
+        DEPENDS ${PROJECT_NAME}.elf
+)
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "concatenating ${PROJECT_NAME} S-records"
         COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.srec ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.srec  > ${PROJECT_NAME}_bootloaded.srec
         DEPENDS ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.srec ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.srec
