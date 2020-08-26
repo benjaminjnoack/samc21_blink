@@ -16,3 +16,5 @@
  
 * blink using an interrupt to demonstrate that the interrupt table has been offset correctly
 * app image validation
+* bootloaded target
+    * CLion requires a target it knows about
