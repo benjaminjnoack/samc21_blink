@@ -14,20 +14,20 @@ target_sources(${PROJECT_NAME} PUBLIC
         $<TARGET_OBJECTS:samc21_cmsis>
         )
 
-target_link_options(${PROJECT_NAME} PRIVATE LINKER:-lm,-gc-sections,--print-memory-usage,--build-id)
+target_link_options(${PROJECT_NAME} PRIVATE LINKER:-lm,-gc-sections,--print-memory-usage,--build-id=md5)
 target_link_options(${PROJECT_NAME} PRIVATE LINKER:-L ${CMAKE_CURRENT_LIST_DIR}/samc21_bootloader/gcc)
 target_link_options(${PROJECT_NAME} PRIVATE LINKER:-T ${CMAKE_CURRENT_LIST_DIR}/samc21_bootloader/gcc/app.ld)
 target_link_options(${PROJECT_NAME} PRIVATE LINKER:-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".elf")
 
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMENT "output assembly"
-        COMMAND ${OBJDUMP} -d ${PROJECT_NAME}.elf > ${PROJECT_NAME}.s
-        COMMAND ${OBJDUMP} -D --dwarf=follow-links ${PROJECT_NAME}.elf > ${PROJECT_NAME}.S
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        BYPRODUCTS ${PROJECT_NAME}.s ${PROJECT_NAME}.S
-        )
+#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#        COMMENT "output assembly"
+#        COMMAND ${OBJDUMP} -d ${PROJECT_NAME}.elf > ${PROJECT_NAME}.s
+#        COMMAND ${OBJDUMP} -D --dwarf=follow-links ${PROJECT_NAME}.elf > ${PROJECT_NAME}.S
+#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+#        BYPRODUCTS ${PROJECT_NAME}.s ${PROJECT_NAME}.S
+#        )
 
 # When objcopy generates a raw binary file, it will essentially produce
 # a memory dump of the contents of the input object file. All symbols and relocation information will be discarded.
