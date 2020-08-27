@@ -47,7 +47,7 @@ int main(void)
 		}
 	}
 
-	struct image_hdr *image_hdr = (struct image_hdr *) __app_rom_start__;
+	struct image_hdr *image_hdr = (struct image_hdr *) &__app_rom_start__;
 	if (image_hdr->checksum == IMAGE_CHECKSUM_DEFAULT) {
 		goto forever;
 	}
@@ -69,11 +69,19 @@ int main(void)
 		}
 	}
 
+	/**
+	 * TODO there is something fucked up here
 	if (sz % sizeof(uint32_t)) {
 		sz += sizeof(uint32_t) - (sz % sizeof(uint32_t));
 	}
+	 */
 
-	app_start = (uint32_t *) (__app_rom_start__ + (sz / sizeof(uint32_t)));
+	/**
+	 * this will be multiplied by 4 to give 0x28
+	 */
+	sz = 0x0A;
+
+	app_start = (uint32_t *) (&__app_rom_start__ + sz);
 	sp = app_start[0];
 	pc = app_start[1];
 	boot_app(sp, pc);
