@@ -70,16 +70,16 @@ int main(void)
 	}
 
 	/**
-	 * TODO there is something fucked up here
+	 * TODO need the size of the image_hdr struct
+	 *  plus the data it contains
+	 * 	plus whatever gets us to the next word address
+	 */
+	sz += sizeof(struct image_hdr);
 	if (sz % sizeof(uint32_t)) {
 		sz += sizeof(uint32_t) - (sz % sizeof(uint32_t));
 	}
-	 */
 
-	/**
-	 * this will be multiplied by 4 to give 0x28
-	 */
-	sz = 0x0A;
+	sz /= sizeof(uint32_t);
 
 	app_start = (uint32_t *) (&__app_rom_start__ + sz);
 	sp = app_start[0];
