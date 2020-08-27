@@ -5,12 +5,13 @@ include(${CMAKE_CURRENT_LIST_DIR}/samc21_bootloader/CMakeLists.txt)
 project(samc21_blink)
 set(CMAKE_VERBOSE_MAKEFILE true)
 add_executable(${PROJECT_NAME})
+# TODO find a nicer way of doing this
 add_dependencies(${PROJECT_NAME} samc21_bootloader)
 
 add_definitions(-D__SAMC21J18A__)
 
 target_sources(${PROJECT_NAME} PUBLIC
-        ${CMAKE_BINARY_DIR}/image.c
+        image.c
         ${CMAKE_CURRENT_LIST_DIR}/samc21_bootloader/src/image.h
         src/main.cpp
         $<TARGET_OBJECTS:samc21_cmsis>
@@ -22,32 +23,6 @@ target_link_options(${PROJECT_NAME} PRIVATE LINKER:-T ${CMAKE_CURRENT_LIST_DIR}/
 target_link_options(${PROJECT_NAME} PRIVATE LINKER:-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".elf")
-
-#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#        COMMENT "output assembly"
-#        COMMAND ${OBJDUMP} -d ${PROJECT_NAME}.elf > ${PROJECT_NAME}.s
-#        COMMAND ${OBJDUMP} -D --dwarf=follow-links ${PROJECT_NAME}.elf > ${PROJECT_NAME}.S
-#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-#        BYPRODUCTS ${PROJECT_NAME}.s ${PROJECT_NAME}.S
-#        )
-
-# When objcopy generates a raw binary file, it will essentially produce
-# a memory dump of the contents of the input object file. All symbols and relocation information will be discarded.
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMENT "output ${PROJECT_NAME} bin"
-        COMMAND ${OBJCOPY} -O binary ${PROJECT_NAME}.elf ${PROJECT_NAME}.bin
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        BYPRODUCTS ${PROJECT_NAME}.bin
-        )
-
-add_custom_command(OUTPUT ${PROJECT_NAME}.crc32.bin
-        COMMENT "patching CRC-32"
-        COMMAND ${CMAKE_CURRENT_LIST_DIR}/samc21_bootloader/crc32.sh ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin
-        DEPENDS ${PROJECT_NAME}.bin
-        )
-# https://gist.github.com/baiwfg2/39881ba703e9c74e95366ed422641609
-add_custom_target(CRC-32 ALL
-        DEPENDS ${PROJECT_NAME}.crc32.bin)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "output ${PROJECT_NAME} S-record"
@@ -69,13 +44,6 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         )
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMENT "concatenating ${PROJECT_NAME} binary images"
-        COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.bin ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.crc32.bin > ${PROJECT_NAME}_bootloaded.bin
-        DEPENDS samc21_bootloader.padded.bin ${PROJECT_NAME}.crc32.bin
-        BYPRODUCTS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_bootloaded.bin
-        )
-
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "Build ID"
         DEPENDS ${PROJECT_NAME}.elf
         COMMAND ${READELF} -n ${PROJECT_NAME}.elf | grep \"Build ID:\" | cut -d \\: -f 2 | sed 's/ //')
@@ -86,3 +54,26 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         DEPENDS ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.srec ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.srec
         BYPRODUCTS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_bootloaded.srec
         )
+
+add_custom_command(OUTPUT ${PROJECT_NAME}.bin
+        COMMENT "output ${PROJECT_NAME} bin"
+        COMMAND ${OBJCOPY} -O binary ${PROJECT_NAME}.elf ${PROJECT_NAME}.bin
+        DEPENDS ${PROJECT_NAME}
+        )
+
+add_custom_command(OUTPUT ${PROJECT_NAME}.crc32.bin
+        COMMENT "patching CRC-32"
+        COMMAND ${CMAKE_CURRENT_LIST_DIR}/samc21_bootloader/crc32.sh ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin
+        DEPENDS ${PROJECT_NAME}.bin
+        )
+
+add_custom_command(OUTPUT ${PROJECT_NAME}.bootloaded.bin
+        COMMENT "concatenating ${PROJECT_NAME} binary images"
+        COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.bin ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.crc32.bin > ${PROJECT_NAME}_bootloaded.bin
+        DEPENDS samc21_bootloader.padded.bin ${PROJECT_NAME}.crc32.bin
+        )
+# the "bootloaded" target is called with ALL
+# it depends on a single file (the output file)
+# which is created by the chain of custom commands above
+add_custom_target(bootloaded ALL
+        DEPENDS ${PROJECT_NAME}.bootloaded.bin)
