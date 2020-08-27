@@ -10,6 +10,8 @@ add_dependencies(${PROJECT_NAME} samc21_bootloader)
 add_definitions(-D__SAMC21J18A__)
 
 target_sources(${PROJECT_NAME} PUBLIC
+        ${CMAKE_BINARY_DIR}/image.c
+        ${CMAKE_CURRENT_LIST_DIR}/samc21_bootloader/src/image.h
         src/main.cpp
         $<TARGET_OBJECTS:samc21_cmsis>
         )
@@ -38,6 +40,15 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         BYPRODUCTS ${PROJECT_NAME}.bin
         )
 
+add_custom_command(OUTPUT ${PROJECT_NAME}.crc32.bin
+        COMMENT "patching CRC-32"
+        COMMAND ${CMAKE_CURRENT_LIST_DIR}/samc21_bootloader/crc32.sh ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin
+        DEPENDS ${PROJECT_NAME}.bin
+        )
+# https://gist.github.com/baiwfg2/39881ba703e9c74e95366ed422641609
+add_custom_target(CRC-32 ALL
+        DEPENDS ${PROJECT_NAME}.crc32.bin)
+
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "output ${PROJECT_NAME} S-record"
         COMMAND ${OBJCOPY} -O srec ${PROJECT_NAME}.elf ${PROJECT_NAME}.srec
@@ -59,8 +70,8 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "concatenating ${PROJECT_NAME} binary images"
-        COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.bin ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin > ${PROJECT_NAME}_bootloaded.bin
-        DEPENDS ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.bin ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin
+        COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.bin ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.crc32.bin > ${PROJECT_NAME}_bootloaded.bin
+        DEPENDS samc21_bootloader.padded.bin ${PROJECT_NAME}.crc32.bin
         BYPRODUCTS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_bootloaded.bin
         )
 
