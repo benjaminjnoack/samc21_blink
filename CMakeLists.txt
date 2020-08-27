@@ -35,12 +35,14 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "output ${PROJECT_NAME} hex"
         COMMAND ${OBJCOPY} -O ihex -R .eeprom -R .fuse -R .lock -R .signature ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        BYPRODUCTS ${PROJECT_NAME}.hex
         )
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "output ${PROJECT_NAME} lss"
         COMMAND ${NM} -S --demangle --numeric-sort ${PROJECT_NAME}.elf > ${PROJECT_NAME}.lss
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        BYPRODUCTS ${PROJECT_NAME}.lss
         )
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -50,27 +52,30 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "concatenating ${PROJECT_NAME} S-records"
-        COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.srec ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.srec > ${PROJECT_NAME}_bootloaded.srec
+        COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.srec ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.srec > ${PROJECT_NAME}.bootloaded.srec
         DEPENDS ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.srec ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.srec
-        BYPRODUCTS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_bootloaded.srec
+        BYPRODUCTS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bootloaded.srec
         )
 
 add_custom_command(OUTPUT ${PROJECT_NAME}.bin
         COMMENT "output ${PROJECT_NAME} bin"
         COMMAND ${OBJCOPY} -O binary ${PROJECT_NAME}.elf ${PROJECT_NAME}.bin
         DEPENDS ${PROJECT_NAME}
+        BYPRODUCTS ${PROJECT_NAME}.bin
         )
 
 add_custom_command(OUTPUT ${PROJECT_NAME}.crc32.bin
         COMMENT "patching CRC-32"
         COMMAND ${CMAKE_CURRENT_LIST_DIR}/samc21_bootloader/crc32.sh ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin
         DEPENDS ${PROJECT_NAME}.bin
+        BYPRODUCTS ${PROJECT_NAME}.crc32.bin
         )
 
 add_custom_command(OUTPUT ${PROJECT_NAME}.bootloaded.bin
         COMMENT "concatenating ${PROJECT_NAME} binary images"
-        COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.bin ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.crc32.bin > ${PROJECT_NAME}_bootloaded.bin
+        COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.bin ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.crc32.bin > ${PROJECT_NAME}.bootloaded.bin
         DEPENDS samc21_bootloader.padded.bin ${PROJECT_NAME}.crc32.bin
+        BYPRODUCTS ${PROJECT_NAME}.bootloaded.bin
         )
 # the "bootloaded" target is called with ALL
 # it depends on a single file (the output file)
