@@ -14,11 +14,12 @@ cp $INPUT_FILE $OUTPUT_FILE
 TEMP_FILE="$OUTPUT_DIR/temp.bin"
 tail -c +5 $INPUT_FILE > $TEMP_FILE
 
-CRC32=$(crc32 $TEMP_FILE)
-echo "CRC-32: 0x$CRC32"
 SIZE=$(wc -c $TEMP_FILE | cut -d ' ' -f 1 | xargs -L1 printf '%x')
 echo "size 0x$SIZE"
+echo "00000000: $(echo -n $SIZE | tac -rs ..)" | xxd -r - $TEMP_FILE
 
+CRC32=$(crc32 $TEMP_FILE)
+echo "CRC-32: 0x$CRC32"
 #rm $TEMP_FILE
 
 echo "00000000: $(echo -n $CRC32 | tac -rs ..)" | xxd -r - $OUTPUT_FILE
