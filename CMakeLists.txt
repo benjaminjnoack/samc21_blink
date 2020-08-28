@@ -11,8 +11,8 @@ add_dependencies(${PROJECT_NAME} samc21_bootloader)
 add_definitions(-D__SAMC21J18A__)
 
 target_sources(${PROJECT_NAME} PUBLIC
+        image.h
         image.c
-        ${CMAKE_CURRENT_LIST_DIR}/samc21_bootloader/src/image.h
         src/main.cpp
         $<TARGET_OBJECTS:samc21_cmsis>
         )
