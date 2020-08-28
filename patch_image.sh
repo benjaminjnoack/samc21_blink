@@ -19,7 +19,7 @@ echo "CRC-32: 0x$CRC32"
 SIZE=$(wc -c $TEMP_FILE | cut -d ' ' -f 1 | xargs -L1 printf '%x')
 echo "size 0x$SIZE"
 
-rm $TEMP_FILE
+#rm $TEMP_FILE
 
 echo "00000000: $(echo -n $CRC32 | tac -rs ..)" | xxd -r - $OUTPUT_FILE
 echo "00000004: $(echo -n $SIZE | tac -rs ..)" | xxd -r - $OUTPUT_FILE
