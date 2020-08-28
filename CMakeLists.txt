@@ -5,7 +5,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/samc21_bootloader/CMakeLists.txt)
 project(samc21_blink)
 set(CMAKE_VERBOSE_MAKEFILE true)
 add_executable(${PROJECT_NAME})
-# TODO find a nicer way of doing this
 add_dependencies(${PROJECT_NAME} samc21_bootloader)
 
 add_definitions(-D__SAMC21J18A__)
@@ -24,20 +23,6 @@ target_link_options(${PROJECT_NAME} PRIVATE LINKER:-Map=${CMAKE_BINARY_DIR}/${PR
 
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".elf")
 
-#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#        COMMENT "output ${PROJECT_NAME} S-record"
-#        COMMAND ${OBJCOPY} -O srec ${PROJECT_NAME}.elf ${PROJECT_NAME}.srec
-#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-#        BYPRODUCTS ${PROJECT_NAME}.srec ${PROJECT_NAME}.padded.srec
-#        )
-
-#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#        COMMENT "output ${PROJECT_NAME} hex"
-#        COMMAND ${OBJCOPY} -O ihex -R .eeprom -R .fuse -R .lock -R .signature ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
-#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-#        BYPRODUCTS ${PROJECT_NAME}.hex
-#        )
-
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "output ${PROJECT_NAME} lss"
         COMMAND ${NM} -S --demangle --numeric-sort ${PROJECT_NAME}.elf > ${PROJECT_NAME}.lss
@@ -49,13 +34,6 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMENT "Build ID"
         DEPENDS ${PROJECT_NAME}.elf
         COMMAND ${READELF} -n ${PROJECT_NAME}.elf | grep \"Build ID:\" | cut -d \\: -f 2 | sed 's/ //')
-
-#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#        COMMENT "concatenating ${PROJECT_NAME} S-records"
-#        COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.srec ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.srec > ${PROJECT_NAME}.bootloaded.srec
-#        DEPENDS ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.srec ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.srec
-#        BYPRODUCTS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bootloaded.srec
-#        )
 
 add_custom_command(OUTPUT ${PROJECT_NAME}.bin
         COMMENT "output ${PROJECT_NAME} bin"
@@ -82,3 +60,27 @@ add_custom_command(OUTPUT ${PROJECT_NAME}.bootloaded.bin
 # which is created by the chain of custom commands above
 add_custom_target(bootloaded ALL
         DEPENDS ${PROJECT_NAME}.bootloaded.bin)
+
+
+# TODO for reference
+#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#        COMMENT "output ${PROJECT_NAME} S-record"
+#        COMMAND ${OBJCOPY} -O srec ${PROJECT_NAME}.elf ${PROJECT_NAME}.srec
+#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+#        BYPRODUCTS ${PROJECT_NAME}.srec ${PROJECT_NAME}.padded.srec
+#        )
+
+#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#        COMMENT "output ${PROJECT_NAME} hex"
+#        COMMAND ${OBJCOPY} -O ihex -R .eeprom -R .fuse -R .lock -R .signature ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
+#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+#        BYPRODUCTS ${PROJECT_NAME}.hex
+#        )
+
+#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#        COMMENT "concatenating ${PROJECT_NAME} S-records"
+#        COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.srec ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.srec > ${PROJECT_NAME}.bootloaded.srec
+#        DEPENDS ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.srec ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.srec
+#        BYPRODUCTS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bootloaded.srec
+#        )
+

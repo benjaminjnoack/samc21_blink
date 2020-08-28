@@ -20,6 +20,3 @@
     * CLion requires a target it knows about
 * build a working ELF of just blink
     * the image files need to be generated?
-* do I need hexes and S-records?
-    * `xxd` does all the parsing I need
-    * neither have debug information
