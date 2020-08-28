@@ -51,12 +51,12 @@ int main(void)
 	}
 
 	/**
-	 * The image is stored at the bottom of app rom
+	 * The image is stored at the start of app rom
 	 */
 	struct image_hdr *image_hdr = (struct image_hdr *) &__app_rom_start__;
 
 	/**
-	 * some basic sanity checks
+	 * basic sanity checks
 	 */
 	if (image_hdr->checksum == IMAGE_DUMMY_CHECKSUM) {
 		goto forever;
@@ -65,7 +65,9 @@ int main(void)
 	crc_table_init();
 
 	/**
-	 * image_size is the next word after the checksum
+	 * image_size is both the first word of,
+	 * and the length of,
+	 * the image used to calculate the checksum during build
 	 */
 	crc32((uint8_t *) &image_hdr->image_size, image_hdr->image_size, &crc);
 	if (crc != image_hdr->checksum) {
@@ -80,7 +82,7 @@ int main(void)
 
 	/**
 	 * iterate through the data
-	 * its all ASCII text so there shouldn't be any 0xFFs
+	 * it's all ASCII text so there shouldn't be any 0xFFs
 	 */
 	for (i = 0; i < sz; i++) {
 		data = image_hdr->data[i];
