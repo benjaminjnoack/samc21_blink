@@ -64,17 +64,17 @@ add_custom_command(OUTPUT ${PROJECT_NAME}.bin
         BYPRODUCTS ${PROJECT_NAME}.bin
         )
 
-add_custom_command(OUTPUT ${PROJECT_NAME}.crc32.bin
-        COMMENT "patching CRC-32"
-        COMMAND ${CMAKE_CURRENT_LIST_DIR}/samc21_bootloader/crc32.sh ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin
+add_custom_command(OUTPUT ${PROJECT_NAME}.patch.bin
+        COMMENT "patching image"
+        COMMAND ${CMAKE_CURRENT_LIST_DIR}/patch_image.sh ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin
         DEPENDS ${PROJECT_NAME}.bin
-        BYPRODUCTS ${PROJECT_NAME}.crc32.bin
+        BYPRODUCTS ${PROJECT_NAME}.patch.bin
         )
 
 add_custom_command(OUTPUT ${PROJECT_NAME}.bootloaded.bin
         COMMENT "concatenating ${PROJECT_NAME} binary images"
-        COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.bin ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.crc32.bin > ${PROJECT_NAME}.bootloaded.bin
-        DEPENDS samc21_bootloader.padded.bin ${PROJECT_NAME}.crc32.bin
+        COMMAND cat ${CMAKE_BINARY_DIR}/samc21_bootloader.padded.bin ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.patch.bin > ${PROJECT_NAME}.bootloaded.bin
+        DEPENDS samc21_bootloader.padded.bin ${PROJECT_NAME}.patch.bin
         BYPRODUCTS ${PROJECT_NAME}.bootloaded.bin
         )
 # the "bootloaded" target is called with ALL
