@@ -15,11 +15,11 @@ TEMP_FILE="$OUTPUT_DIR/temp.bin"
 tail -c +5 $INPUT_FILE > $TEMP_FILE
 # the size of the image is equal to the number of bytes the CRC was calculated on
 SIZE=$(wc -c $TEMP_FILE | cut -d ' ' -f 1 | xargs -L1 printf '%x')
-echo "size 0x$SIZE"
+echo -e "size:\t0x$SIZE"
 # the size word must be written to the temp artifact to ensure the CRC is the same the bootloader will calculate
 echo "00000000: $(echo -n $SIZE | tac -rs ..)" | xxd -r - $TEMP_FILE
 CRC32=$(crc32 $TEMP_FILE)
-echo "CRC-32: 0x$CRC32"
+echo -e "crc32:\t0x$CRC32"
 rm $TEMP_FILE
 # write the CRC and size into the final build artifact
 echo "00000000: $(echo -n $CRC32 | tac -rs ..)" | xxd -r - $OUTPUT_FILE
