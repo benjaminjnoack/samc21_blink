@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16.3)
 include(${CMAKE_CURRENT_LIST_DIR}/samc21_bootloader/CMakeLists.txt)
 
 project(samc21_blink)
-set(CMAKE_VERBOSE_MAKEFILE true)
+
 add_executable(${PROJECT_NAME})
 add_dependencies(${PROJECT_NAME} samc21_bootloader)
 
